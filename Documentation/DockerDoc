@@ -1,0 +1,5 @@
+
+Scalabilité : répartition de charge
+Registry : passage d'un environnement dev à un environnement de prod avec une image buildée
+    CI : Continuous Integration = Pousser son code test tout ça
+    CD : Continuous Deployment = Si valide, possibilité de déployer

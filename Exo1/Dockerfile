@@ -7,3 +7,5 @@ WORKDIR /opt
 RUN echo $VERSION
 ENTRYPOINT ["bash"]
 CMD ["-c", "echo $MSG"]
+
+#docker run -d -p 8001:80 --network="multihost" --name tpa2 tpa
