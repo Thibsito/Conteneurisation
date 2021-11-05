@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: TP1 NGINX 8000
 
 on:
   push:
