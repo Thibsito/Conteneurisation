@@ -1,0 +1,13 @@
+Commandes :
+# Lancer serveur
+- minikube start
+# Status 
+- minikube status
+# Prise en main SSH
+- minikube ssh
+# Logs Minikube
+- minikube logs
+# Configuration IP minikube
+- minikupe ip
+# Modifier la configuration de minikube
+- minikube config
