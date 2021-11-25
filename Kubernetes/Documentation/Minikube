@@ -1,0 +1,61 @@
+Commandes :
+# Lancer serveur
+- minikube start
+# Arreter serveur
+- minikube stop
+# Supprimer 
+- minikube delete
+# Status 
+- minikube status
+# Prise en main SSH
+- minikube ssh
+# Logs Minikube
+- minikube logs
+# Configuration IP minikube
+- minikupe ip
+# Modifier la configuration de minikube
+- minikube config
+# Affiche des trucs
+kubectl get -- all -A
+# Affiche d'autres trucs (le o agis comme un grep)
+minikube kubectl get -- all -A -o name
+# Récupérer les infos des pods
+kubectl get -- pods
+# PortForwarding Service - Type ClusterIP
+kubectl port-forward service/nginx-svc 8080:80
+# PortForwarding Pod - Type ClusterIP
+kubectl port-forward nginx 8080:80
+# Type Tunnel
+minikube tunnel
+curl 10.100.46.99
+# type Nodeport
+nodeport <port>
+minikube ip <ip>
+kubectl get svc nginx -o jsonpath="{.specport[O].nodeport}
+# Type LoadBalancing
+minikube tunnel
+# Créer un volume 
+minikube ssh
+mkdir /mnt/clata
+# ConfigMap
+Ressource permettant de faire un volume
+kubectl create cm index1 --from-file=index.html
+# Monter un volume
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.14.2
+    ports:
+    - containerPort: 80
+    volumeMounts:
+    - name: html
+      mountPath: /usr/share/nginx/html
+  volumes:
+  - name: html
+    configMap:
+      name: index1
+# Voir les logs
+kubectl logs -f
+# Installer l'addon metrics
+minikube addons enable metrics-server
+kubectl top pod
