@@ -1,0 +1,15 @@
+# Définition Ingress
+c''est la ressource qui permet de configurer le point d'entrée de cluster d'un point de vue réseau / web
+Lien DNS entre adresse IP / Nom de domaine
+Ou aussi appelé reverse proxy pour Kubernetes 
+Permet également la configuration des route
+# Lancer les 3 pods
+ingress / pod / service
+# Lancer addon Minikube
+minikube addons enable ingress
+# Lancer le tunnel minikube
+minikube tunnel
+# Récupérer son @IP
+minikube ip 
+# Tester la résolution
+curl --resolve "localhost.ingress.test:80:@IP" -D- "localhost.ingress.test"

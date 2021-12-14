@@ -1,0 +1,16 @@
+ingress:
+  enabled: true
+
+service:
+  type: LoadBalancer
+
+configMap:
+  name: index-copy
+  file: index.html
+  values: |-
+    <html>Hello world from external values !!</html>
+
+volume:
+  name: html-volume
+  path: /usr/share/nginx/html
+  cmName: index-copy

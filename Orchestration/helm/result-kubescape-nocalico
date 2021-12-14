@@ -1,0 +1,303 @@
+thibault@XPS:~/Documents/Conteneurisation/Orchestration$ kubescape scan framework nsa
+ARMO security scanner starting
+[progress] Downloading/Loading policy definitions
+[success] Downloaded/Loaded policy
+[progress] Accessing Kubernetes objects
+W1213 09:35:22.584941   34964 warnings.go:70] policy/v1beta1 PodSecurityPolicy is deprecated in v1.21+, unavailable in v1.25+
+[success] Accessed successfully to Kubernetes objects
+[success] Let’s start!!!
+[progress] Scanning cluster minikube
+◑ [success] Done scanning cluster minikube
+[control: Allow privilege escalation] failed 😥
+Description: Attackers may gain access to a container and uplift its privilege to enable excessive capabilities.
+Failed:
+   Namespace default
+      Pod - nginx 
+      Deployment - lb-load-balancer 
+   Namespace kube-system
+      Pod - etcd-minikube 
+      Pod - kube-apiserver-minikube 
+      Pod - kube-controller-manager-minikube 
+      Pod - kube-scheduler-minikube 
+      Pod - storage-provisioner 
+      DaemonSet - kube-proxy 
+   Namespace ingress-nginx
+      Deployment - ingress-nginx-controller 
+      Job - ingress-nginx-admission-create 
+      Job - ingress-nginx-admission-patch 
+Summary - Passed:1   Excluded:0   Failed:11   Total:12
+Remediation: If your application does not need it, make sure the allowPrivilegeEscalation field of the securityContext is set to false.
+
+[control: Allowed hostPath] failed 😥
+Description: Mounting host directory to the container can be abused to get access to sensitive data and gain persistence on the host machine.
+Failed:
+   Namespace kube-system
+      Pod - etcd-minikube 
+      Pod - kube-controller-manager-minikube 
+      Pod - storage-provisioner 
+      DaemonSet - kube-proxy 
+Summary - Passed:8   Excluded:0   Failed:4   Total:12
+Remediation: Refrain from using host path mount.
+
+[control: Applications credentials in configuration files] passed 👍
+Description: Attackers who have access to configuration files can steal the stored secrets and use them. This control checks if ConfigMaps or pod specifications have sensitive information in their configuration.
+Summary - Passed:27   Excluded:0   Failed:0   Total:27
+
+[control: Automatic mapping of service account] failed 😥
+Description: Potential attacker may gain access to a POD and steal its service account token. Therefore, it is recommended to disable automatic mapping of the service account tokens in service account configuration and enable it only for PODs that need to use them.
+Failed:
+   Namespace kube-node-lease
+      ServiceAccount - default 
+   Namespace kube-public
+      ServiceAccount - default 
+   Namespace kube-system
+      ServiceAccount - attachdetach-controller 
+      ServiceAccount - bootstrap-signer 
+      ServiceAccount - certificate-controller 
+      ServiceAccount - clusterrole-aggregation-controller 
+      ServiceAccount - coredns 
+      ServiceAccount - cronjob-controller 
+      ServiceAccount - daemon-set-controller 
+      ServiceAccount - default 
+      ServiceAccount - deployment-controller 
+      ServiceAccount - disruption-controller 
+      ServiceAccount - endpoint-controller 
+      ServiceAccount - endpointslice-controller 
+      ServiceAccount - endpointslicemirroring-controller 
+      ServiceAccount - ephemeral-volume-controller 
+      ServiceAccount - expand-controller 
+      ServiceAccount - generic-garbage-collector 
+      ServiceAccount - horizontal-pod-autoscaler 
+      ServiceAccount - job-controller 
+      ServiceAccount - kube-proxy 
+      ServiceAccount - namespace-controller 
+      ServiceAccount - node-controller 
+      ServiceAccount - persistent-volume-binder 
+      ServiceAccount - pod-garbage-collector 
+      ServiceAccount - pv-protection-controller 
+      ServiceAccount - pvc-protection-controller 
+      ServiceAccount - replicaset-controller 
+      ServiceAccount - replication-controller 
+      ServiceAccount - resourcequota-controller 
+      ServiceAccount - root-ca-cert-publisher 
+      ServiceAccount - service-account-controller 
+      ServiceAccount - service-controller 
+      ServiceAccount - statefulset-controller 
+      ServiceAccount - storage-provisioner 
+      ServiceAccount - token-cleaner 
+      ServiceAccount - ttl-after-finished-controller 
+      ServiceAccount - ttl-controller 
+   Namespace default
+      ServiceAccount - default 
+      ServiceAccount - lb-load-balancer 
+   Namespace ingress-nginx
+      ServiceAccount - default 
+      ServiceAccount - ingress-nginx 
+      ServiceAccount - ingress-nginx-admission 
+Summary - Passed:0   Excluded:0   Failed:43   Total:43
+Remediation: Disable automatic mounting of service account tokens to PODs either at the service account level or at the individual POD level, by specifying the automountServiceAccountToken: false. Note that POD level takes precedence.
+
+[control: CVE-2021-25741 - Using symlink for arbitrary host file system access.] passed 👍
+Description: A user may be able to create a container with subPath or subPathExpr volume mounts to access files & directories anywhere on the host filesystem. Following Kubernetes versions are affected: v1.22.0 - v1.22.1, v1.21.0 - v1.21.4, v1.20.0 - v1.20.10, version v1.19.14 and lower. This control checks the vulnerable versions and the actual usage of the subPath feature in all Pods in the cluster.
+Summary - Passed:13   Excluded:0   Failed:0   Total:13
+
+[control: CVE-2021-25742-nginx-ingress-snippet-annotation-vulnerability] failed 😥
+Description: Security issue in ingress-nginx where a user that can create or update ingress objects can use the custom snippets feature to obtain all secrets in the cluster (see more at https://github.com/kubernetes/ingress-nginx/issues/7837)
+Failed:
+   Namespace ingress-nginx
+      Deployment - ingress-nginx-controller 
+Summary - Passed:17   Excluded:0   Failed:1   Total:18
+Remediation: To mitigate this vulnerability: 1. Upgrade to a version that allows mitigation (>= v0.49.1 or >= v1.0.1), 2. Set allow-snippet-annotations to false in your ingress-nginx ConfigMap based on how you deploy ingress-nginx
+
+[control: Cluster-admin binding] failed 😥
+Description: Attackers who have cluster admin permissions (can perform any action on any resource), can take advantage of their privileges for malicious activities. This control determines which subjects have cluster admin permissions.
+Failed:
+   Namespace kube-system
+      ServiceAccount - default  [ClusterRoleBinding - minikube-rbac, ClusterRole - cluster-admin]
+   Groups
+      Group - system:masters  [ClusterRoleBinding - cluster-admin, ClusterRole - cluster-admin]
+Summary - Passed:72   Excluded:0   Failed:2   Total:74
+Remediation: You should apply least privilege principle. Make sure cluster admin permissions are granted only when it is absolutely necessary. Don't use subjects with such high permissions for daily operations.
+
+[control: Container hostPort] failed 😥
+Description: Configuring hostPort limits you to a particular port, and if any two workloads that specify the same HostPort they cannot be deployed to the same node. Therefore, if the number of replica of such workload is higher than the number of nodes, the deployment will fail.
+Failed:
+   Namespace ingress-nginx
+      Deployment - ingress-nginx-controller 
+Summary - Passed:11   Excluded:0   Failed:1   Total:12
+Remediation: Avoid usage of hostPort unless it is absolutely necessary. Use NodePort / ClusterIP instead.
+
+[control: Control plane hardening] passed 👍
+Description: Kubernetes control plane API is running with non-secure port enabled which allows attackers to gain unprotected access to the cluster.
+Summary - Passed:6   Excluded:0   Failed:0   Total:6
+
+[control: Dangerous capabilities] passed 👍
+Description: Giving dangerous and unnecessary LINUX capabilities to a container can increase the impact of the container compromise. This control identifies all the PODs with dangerous capabilities such as SYS_ADMIN and others.
+Summary - Passed:12   Excluded:0   Failed:0   Total:12
+
+[control: Exec into container] failed 😥
+Description: Attackers with relevant permissions can run malicious commands in the context of legitimate containers in the cluster using “kubectl exec” command. This control determines which subjects have permissions to use this command.
+Failed:
+   Namespace kube-system
+      ServiceAccount - default  [ClusterRoleBinding - minikube-rbac, ClusterRole - cluster-admin]
+   Groups
+      Group - system:masters  [ClusterRoleBinding - cluster-admin, ClusterRole - cluster-admin]
+Summary - Passed:72   Excluded:0   Failed:2   Total:74
+Remediation: It is recommended to prohibit “kubectl exec” command in production environments. It is also recommended not to use subjects with this permission for daily cluster operations.
+
+[control: Exposed dashboard] passed 👍
+Description: Kubernetes dashboard versions before v2.0.1 do not support user authentication. If exposed externally, it will allow unauthenticated remote management of the cluster. This control checks presence of the kubernetes-dashboard deployment and its version number.
+Summary - Passed:9   Excluded:0   Failed:0   Total:9
+
+[control: Host PID/IPC privileges] passed 👍
+Description: Containers should be as isolated as possible from the host machine. The hostPID and hostIPC fields in Kubernetes may excessively expose the host to potentially malicious actions.
+Summary - Passed:12   Excluded:0   Failed:0   Total:12
+
+[control: Immutable container filesystem] failed 😥
+Description: Mutable container filesystem can be abused to inject malicious code or data into containers. Use immutable (read-only) filesystem to limit potential attacks.
+Failed:
+   Namespace default
+      Pod - nginx 
+      Deployment - lb-load-balancer 
+   Namespace kube-system
+      Pod - etcd-minikube 
+      Pod - kube-apiserver-minikube 
+      Pod - kube-controller-manager-minikube 
+      Pod - kube-scheduler-minikube 
+      Pod - storage-provisioner 
+      DaemonSet - kube-proxy 
+   Namespace ingress-nginx
+      Deployment - ingress-nginx-controller 
+      Job - ingress-nginx-admission-create 
+      Job - ingress-nginx-admission-patch 
+Summary - Passed:1   Excluded:0   Failed:11   Total:12
+Remediation: Set the filesystem of the container to read-only when possible (POD securityContext, readOnlyRootFilesystem: true). If containers application needs to write into the filesystem, it is recommended to mount secondary filesystems for specific directories where application require write access.
+
+[control: Ingress and Egress blocked] failed 😥
+Description: Disable Ingress and Egress traffic on all pods wherever possible. It is recommended to define restrictive network policy on all new PODs, and then enable sources/destinations that this POD must communicate with.
+Failed:
+   Namespace default
+      Pod - nginx 
+      Deployment - lb-load-balancer 
+   Namespace kube-system
+      Pod - etcd-minikube 
+      Pod - kube-apiserver-minikube 
+      Pod - kube-controller-manager-minikube 
+      Pod - kube-scheduler-minikube 
+      Pod - storage-provisioner 
+      Deployment - coredns 
+      DaemonSet - kube-proxy 
+   Namespace ingress-nginx
+      Deployment - ingress-nginx-controller 
+      Job - ingress-nginx-admission-create 
+      Job - ingress-nginx-admission-patch 
+Summary - Passed:0   Excluded:0   Failed:12   Total:12
+Remediation: Define a network policy that restricts ingress and egress connections.
+
+[control: Insecure capabilities] passed 👍
+Description: Giving insecure or excsessive capabilities to a container can increase the impact of the container compromise. This control identifies all the PODs with dangerous capabilities (see documentation pages for details).
+Summary - Passed:12   Excluded:0   Failed:0   Total:12
+
+[control: Linux hardening] failed 😥
+Description: Containers may be given more privileges than they actually need. This can increase the potential impact of a container compromise.
+Failed:
+   Namespace default
+      Pod - nginx 
+      Deployment - lb-load-balancer 
+   Namespace kube-system
+      Pod - storage-provisioner 
+      DaemonSet - kube-proxy 
+   Namespace ingress-nginx
+      Job - ingress-nginx-admission-create 
+      Job - ingress-nginx-admission-patch 
+Summary - Passed:6   Excluded:0   Failed:6   Total:12
+Remediation: You can use AppArmor, Seccomp, SELinux and Linux Capabilities mechanisms to restrict containers abilities to utilize unwanted privileges.
+
+[control: Network policies] failed 😥
+Description: If no network policy is defined, attackers who gain access to a single container may use it to probe the network. This control lists all namespaces in which no network policies are defined.
+Failed:
+      Namespace - default 
+      Namespace - ingress-nginx 
+      Namespace - kube-node-lease 
+      Namespace - kube-public 
+      Namespace - kube-system 
+Summary - Passed:0   Excluded:0   Failed:5   Total:5
+Remediation: Define network policies or use similar network protection mechanisms.
+
+[control: Non-root containers] passed 👍
+Description: Potential attackers may gain access to a container and leverage its existing privileges to conduct an attack. Therefore, it is not recommended to deploy containers with root privileges unless it is absolutely necessary. This contol identifies all the Pods running as root or can escalate to root.
+Summary - Passed:12   Excluded:0   Failed:0   Total:12
+
+[control: Privileged container] failed 😥
+Description: Potential attackers may gain access to privileged containers and inherit access to the host resources. Therefore, it is not recommended to deploy privileged containers unless it is absolutely necessary. This control identifies all the privileged Pods.
+Failed:
+   Namespace kube-system
+      DaemonSet - kube-proxy 
+Summary - Passed:11   Excluded:0   Failed:1   Total:12
+Remediation: Remove privileged capabilities by setting the securityContext.privileged to false. If you must deploy a Pod as privileged, add other restriction to it, such as network policy, Seccomp etc and still remove all unnecessary capabilities. Use the exception mechanism to remove unnecessary notifocations.
+
+[control: Resource policies] failed 😥
+Description: CPU and memory resources should have a limit set for every container to prevent resource exhaustion. This control identifies all the Pods without resource limit definition.
+Failed:
+   Namespace default
+      Pod - nginx 
+      Deployment - lb-load-balancer 
+   Namespace kube-system
+      Pod - etcd-minikube 
+      Pod - kube-apiserver-minikube 
+      Pod - kube-controller-manager-minikube 
+      Pod - kube-scheduler-minikube 
+      Pod - storage-provisioner 
+      DaemonSet - kube-proxy 
+   Namespace ingress-nginx
+      Deployment - ingress-nginx-controller 
+      Job - ingress-nginx-admission-create 
+      Job - ingress-nginx-admission-patch 
+Summary - Passed:1   Excluded:0   Failed:11   Total:12
+Remediation: Define LimitRange and ResourceQuota policies to limit resource usage for namespaces or nodes.
+
+[control: hostNetwork access] failed 😥
+Description: Potential attackers may gain access to a POD and inherit access to the entire host network. For example, in AWS case, they will have access to the entire VPC. This control identifies all the PODs with host network access enabled.
+Failed:
+   Namespace kube-system
+      Pod - etcd-minikube 
+      Pod - kube-apiserver-minikube 
+      Pod - kube-controller-manager-minikube 
+      Pod - kube-scheduler-minikube 
+      Pod - storage-provisioner 
+      DaemonSet - kube-proxy 
+Summary - Passed:6   Excluded:0   Failed:6   Total:12
+Remediation: Only connect PODs to host network when it is necessary. If not, set the hostNetwork field of the pod spec to false, or completely remove it (false is the default). Whitelist only those PODs that must have access to host network by design.
+
+NSA FRAMEWORK
++-----------------------------------------------------------------------+------------------+--------------------+---------------+-----------+
+|                             CONTROL NAME                              | FAILED RESOURCES | EXCLUDED RESOURCES | ALL RESOURCES | % SUCCESS |
++-----------------------------------------------------------------------+------------------+--------------------+---------------+-----------+
+| Allow privilege escalation                                            |        11        |         0          |      12       |    8%     |
+| Allowed hostPath                                                      |        4         |         0          |      12       |    66%    |
+| Applications credentials in configuration files                       |        0         |         0          |      27       |   100%    |
+| Automatic mapping of service account                                  |        43        |         0          |      43       |    0%     |
+| CVE-2021-25741 - Using symlink for arbitrary host file system access. |        0         |         0          |      13       |   100%    |
+| CVE-2021-25742-nginx-ingress-snippet-annotation-vulnerability         |        1         |         0          |      18       |    94%    |
+| Cluster-admin binding                                                 |        2         |         0          |      74       |    97%    |
+| Container hostPort                                                    |        1         |         0          |      12       |    91%    |
+| Control plane hardening                                               |        0         |         0          |       6       |   100%    |
+| Dangerous capabilities                                                |        0         |         0          |      12       |   100%    |
+| Exec into container                                                   |        2         |         0          |      74       |    97%    |
+| Exposed dashboard                                                     |        0         |         0          |       9       |   100%    |
+| Host PID/IPC privileges                                               |        0         |         0          |      12       |   100%    |
+| Immutable container filesystem                                        |        11        |         0          |      12       |    8%     |
+| Ingress and Egress blocked                                            |        12        |         0          |      12       |    0%     |
+| Insecure capabilities                                                 |        0         |         0          |      12       |   100%    |
+| Linux hardening                                                       |        6         |         0          |      12       |    50%    |
+| Network policies                                                      |        5         |         0          |       5       |    0%     |
+| Non-root containers                                                   |        0         |         0          |      12       |   100%    |
+| Privileged container                                                  |        1         |         0          |      12       |    91%    |
+| Resource policies                                                     |        11        |         0          |      12       |    8%     |
+| hostNetwork access                                                    |        6         |         0          |      12       |    50%    |
++-----------------------------------------------------------------------+------------------+--------------------+---------------+-----------+
+|                           RESOURCE SUMMARY                            |        62        |         0          |      156      |    60%    |
++-----------------------------------------------------------------------+------------------+--------------------+---------------+-----------+
+
+
+You can see the results in a user-friendly UI, choose your preferred compliance framework, check risk results history and trends, manage exceptions, get remediation recommendations and much more by registering here: https://portal.armo.cloud

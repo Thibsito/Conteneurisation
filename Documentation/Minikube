@@ -1,6 +1,10 @@
 Commandes :
 # Lancer serveur
 - minikube start
+# Arreter serveur
+- minikube stop
+# Supprimer 
+- minikube delete
 # Status 
 - minikube status
 # Prise en main SSH
@@ -11,3 +15,94 @@ Commandes :
 - minikupe ip
 # Modifier la configuration de minikube
 - minikube config
+# Affiche des trucs
+kubectl get -- all -A
+# Affiche d'autres trucs (le o agis comme un grep)
+minikube kubectl get -- all -A -o name
+# Récupérer les infos des pods
+kubectl get -- pods
+# PortForwarding Service - Type ClusterIP
+kubectl port-forward service/nginx-svc 8080:80
+# PortForwarding Pod - Type ClusterIP
+kubectl port-forward nginx 8080:80
+# Type Tunnel
+minikube tunnel
+curl 10.100.46.99
+# type Nodeport
+nodeport <port>
+minikube ip <ip>
+kubectl get svc nginx -o jsonpath="{.specport[O].nodeport}
+# Type LoadBalancing
+minikube tunnel
+# Créer un volume 
+minikube ssh
+mkdir /mnt/clata
+# ConfigMap
+Ressource permettant de faire un volume
+kubectl create cm index1 --from-file=index.html
+# Monter un volume
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.14.2
+    ports:
+    - containerPort: 80
+    volumeMounts:
+    - name: html
+      mountPath: /usr/share/nginx/html
+  volumes:
+  - name: html
+    configMap:
+      name: index1
+# Voir les logs
+kubectl logs -f
+# Installer l'addon metrics
+minikube addons enable metrics-server
+kubectl top pod
+# Create multiple node
+minikube start --nodes 2 -p multinode-demo
+# Cluster Networking
+Désactiver de base, brique centralde Kubernetes
+Attribue une adresse IP et définit les entrées DNS
+Nécessite d'ajouter les paramètres --network-plugin=cni --cni=calico
+# Ingress
+- Gère l'accès externe aux services en leur associant des routes
+- Permet de sécuriser l'accès via un certificat ssl
+- Configuration possible via annotation et configMap
+
+Les différents ressources ingress sont ensuite regroupé en une conf nginx
+
+Lié à un namespace, les services doivent être dans le même namespace
+
+Avec minikube, nécessite d'ajouter l'addon ingress
+minikube addons enable ingress
+# Nodes
+Machine de travail dans un cluster Kubernetes
+Types
+- master
+- node
+Status
+- Taint
+- Untaint
+Condition
+- OutOfDisk
+- Ready
+- MemoryPressure
+- PIDPressure
+- DiskPressure
+- NetworkUnavailable
+Permet d'attribuer des ressources uniquement à certains nodes via le système d'affinité
+# CRDs
+CRDs : Custom Resource Definitions
+Type de CRDs:
+- Ingress
+- Cronjob
+- HPA
+Avantages:
+- Simplifie le déploiement, un seul manifeste est requis
+Permet de lancer différentes ressources en même temps
+- Nécessite de mettre en place des ressources spécifiques
+Limites :
+- Mise à jour du CRD selon mise à jour de kubernetes
+- Demande une compétence en dev pour le créer
+- Ajoute un niveau de complexité
